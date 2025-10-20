@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    # Locale (DB sulla tua macchina)
+    url: jdbc:postgresql://localhost:5432/mydb?currentSchema=expenses
+    username: michele
+    password: qwerty1234
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 60000
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: create   # per dev; in prod usa Flyway/Liquibase
+    show-sql: true
+    properties:
+      hibernate:
+        # opzionale con Boot 3+ (autodetect), ma esplicitarlo non guasta
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_schema: expenses   # alternativa a currentSchema nell'URL
+
+server:
+  port: 8081
