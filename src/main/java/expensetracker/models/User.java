@@ -3,7 +3,6 @@ package expensetracker.models;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.antlr.v4.runtime.misc.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

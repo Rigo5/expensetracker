@@ -40,4 +40,16 @@ public record Expense(
         @UpdateTimestamp
         LocalDate updateDate
 		) 
-{}
+{
+	
+	public Expense(String description, 
+			User owner,
+			BigDecimal amount,
+			TransactionCategory category,
+			TransactionType type) {
+		
+		this(null, description, owner, amount, category, type, null, null)
+	}
+	
+	
+}
