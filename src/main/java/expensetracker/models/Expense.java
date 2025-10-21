@@ -48,7 +48,7 @@ public record Expense(
 			TransactionCategory category,
 			TransactionType type) {
 		
-		this(null, description, owner, amount, category, type, null, null)
+		this(null, description, owner, amount, category, type, null, null);
 	}
 	
 	

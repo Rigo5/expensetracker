@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import expensetracker.models.Expense;
 import expensetracker.models.ExpenseRequest;
@@ -11,6 +12,7 @@ import expensetracker.models.User;
 import expensetracker.repository.ExpenseRepository;
 import expensetracker.repository.UserRepository;
 
+@Service
 public class ExpenseServiceImpl implements ExpenseService{
 
 	private final ExpenseRepository expenseRepository; 
