@@ -46,7 +46,7 @@ public class ExpenseServiceImpl implements ExpenseService{
 				request.category(),
 				request.type());
 		expenseRepository.save(expense);
-		return Optional.of(expense.id());
+		return Optional.of(expense.getId());
 	}
 
 	@Override

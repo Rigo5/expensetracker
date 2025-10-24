@@ -14,6 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity(name = "Users")
 @Table(
@@ -23,26 +26,30 @@ import jakarta.persistence.UniqueConstraint;
                 name = "email_uniquess"
         )
 )
-public record User(
-        @Id
-        @GeneratedValue
-        Long id,
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
+    @Id
+    @GeneratedValue
+    Long id;
 
-        @Column(nullable = false)
-        String name,
+    @Column(nullable = false)
+    String name;
 
-        @Column(nullable = false)
-        String surname,
+    @Column(nullable = false)
+    String surname;
 
-        @Column(nullable = false)
-        String email,
+    @Column(nullable = false)
+    String email;
 
-        @CreationTimestamp
-        LocalDate createDate,
-        
-        @UpdateTimestamp
-        LocalDate updateDate,
-        
-        @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-        List<Expense> transactions
-) {}
+    @CreationTimestamp
+    LocalDate createDate;
+    
+    @UpdateTimestamp
+    LocalDate updateDate;
+    /*
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Expense> transactions;
+	*/
+}

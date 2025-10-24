@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create   # per dev; in prod usa Flyway/Liquibase
+      ddl-auto: update   # per dev; in prod usa Flyway/Liquibase
     show-sql: true
     properties:
       hibernate:

@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public Optional<Long> create(User request) {
 		User user = userRepository.save(request); 
-		return Optional.of(user.id());
+		return Optional.of(user.getId());
 	}
 
 	@Override
