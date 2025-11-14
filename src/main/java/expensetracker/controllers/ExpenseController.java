@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import expensetracker.models.Expense;
 import expensetracker.models.ExpenseRequest;
 import expensetracker.models.IdResponse;
 import expensetracker.services.ExpenseService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -24,6 +26,7 @@ public class ExpenseController {
 
 	private ExpenseService expenseService; 
 	
+	@Autowired
 	public ExpenseController(ExpenseService expenseService) {
 		this.expenseService = expenseService; 
 	}
@@ -42,7 +45,7 @@ public class ExpenseController {
 	}
 	
 	@PostMapping("/")
-	public ResponseEntity<?> create(@RequestBody ExpenseRequest request){
+	public ResponseEntity<?> create(@RequestBody @Valid ExpenseRequest request){
 		Optional<Long> expenseId = expenseService.create(request); 
 		if(expenseId.isEmpty()) return ResponseEntity.badRequest().build();
 		return ResponseEntity
