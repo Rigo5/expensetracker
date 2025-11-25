@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import expensetracker.exception.UserNotFoundException;
 import expensetracker.models.Expense;
 import expensetracker.models.ExpenseRequest;
 import expensetracker.models.User;
@@ -36,15 +37,15 @@ public class ExpenseServiceImpl implements ExpenseService{
 
 	@Override
 	public Optional<Long> create(ExpenseRequest request) {
-		if(!userRepository.existsById(request.ownerId())) return Optional.empty(); 
+		if(!userRepository.existsById(request.getOwnerId())) throw new UserNotFoundException("User id not found");
 		
-		User owner = userRepository.getReferenceById(request.ownerId());
+		User owner = userRepository.getReferenceById(request.getOwnerId());
 		Expense expense = new Expense(
-				request.description(),
+				request.getDescription(),
 				owner,
-				request.amount(),
-				request.category(),
-				request.type());
+				request.getAmount(),
+				request.getCategory(),
+				request.getType());
 		expenseRepository.save(expense);
 		return Optional.of(expense.getId());
 	}
