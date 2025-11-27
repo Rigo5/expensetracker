@@ -5,10 +5,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
@@ -20,9 +22,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @SpringBootTest
+@TestPropertySource(properties = {
+		"app.auth.username=testuser",
+		"app.auth.password=testpass"
+})
 @AutoConfigureMockMvc
 @Transactional
 public class ExpenseControllerIT {
+
+	private static final String USERNAME = "testuser";
+	private static final String PASSWORD = "testpass";
 	
 	@Autowired
 	private MockMvc mockMvc; 
@@ -45,7 +54,8 @@ public class ExpenseControllerIT {
 		MvcResult result = mockMvc
 				.perform(post("/api/expenses/")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(jsonRequest))
+						.content(jsonRequest)
+						.with(httpBasic(USERNAME, PASSWORD)))
 				.andReturn();
 		
 		int status = result.getResponse().getStatus();
@@ -72,7 +82,8 @@ public class ExpenseControllerIT {
 			MvcResult result = mockMvc
 					.perform(post("/api/expenses/")
 							.contentType(MediaType.APPLICATION_JSON)
-							.content(jsonRequest))
+							.content(jsonRequest)
+							.with(httpBasic(USERNAME, PASSWORD)))
 					.andReturn();
 			
 			int status = result.getResponse().getStatus();
@@ -99,7 +110,8 @@ public class ExpenseControllerIT {
 			MvcResult result = mockMvc
 					.perform(post("/api/expenses/")
 							.contentType(MediaType.APPLICATION_JSON)
-							.content(jsonRequest))
+							.content(jsonRequest)
+							.with(httpBasic(USERNAME, PASSWORD)))
 					.andReturn();
 			
 			int status = result.getResponse().getStatus();
@@ -126,7 +138,8 @@ public class ExpenseControllerIT {
 			MvcResult result = mockMvc
 					.perform(post("/api/expenses/")
 							.contentType(MediaType.APPLICATION_JSON)
-							.content(jsonRequest))
+							.content(jsonRequest)
+							.with(httpBasic(USERNAME, PASSWORD)))
 					.andReturn();
 			
 			int status = result.getResponse().getStatus();
