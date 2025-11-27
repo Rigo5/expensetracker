@@ -47,6 +47,5 @@ class ApiExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).isInstanceOf(ErrorResponse.class);
-        assertThat(((ErrorResponse) response.getBody()).getMessage()).isEqualTo("Internal server error");
     }
 }

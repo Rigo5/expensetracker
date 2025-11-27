@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,8 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,8 +38,14 @@ import expensetracker.models.TransactionCategory;
 import expensetracker.models.TransactionType;
 import expensetracker.models.User;
 import expensetracker.services.ExpenseService;
+import expensetracker.config.SecurityConfig;
 
 @WebMvcTest(controllers = ExpenseController.class)
+@Import(SecurityConfig.class)
+@TestPropertySource(properties = {
+        "app.auth.username=testuser",
+        "app.auth.password=testpass"
+})
 class ExpenseControllerTest {
 
     @Autowired
@@ -48,6 +57,9 @@ class ExpenseControllerTest {
     @MockitoBean
     private ExpenseService expenseService;
 
+    private static final String USERNAME = "testuser";
+    private static final String PASSWORD = "testpass";
+
     @Test
     @DisplayName("GET /api/expenses/ should return all expenses")
     void allShouldReturnExpenses() throws Exception {
@@ -57,7 +69,7 @@ class ExpenseControllerTest {
 
         when(expenseService.findAll()).thenReturn(List.of(expense));
 
-        mockMvc.perform(get("/api/expenses/"))
+        mockMvc.perform(get("/api/expenses/").with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].description").value("Laptop"))
@@ -72,7 +84,7 @@ class ExpenseControllerTest {
     void getShouldReturnNotFoundWhenMissing() throws Exception {
         when(expenseService.find(20L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/expenses/{id}", 20L))
+        mockMvc.perform(get("/api/expenses/{id}", 20L).with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isNotFound());
 
         verify(expenseService).find(20L);
@@ -88,7 +100,7 @@ class ExpenseControllerTest {
 
         when(expenseService.find(30L)).thenReturn(Optional.of(expense));
 
-        mockMvc.perform(get("/api/expenses/{id}", 30L))
+        mockMvc.perform(get("/api/expenses/{id}", 30L).with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Groceries")));
 
@@ -106,7 +118,8 @@ class ExpenseControllerTest {
 
         mockMvc.perform(post("/api/expenses/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(request))
+                .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/expenses/55"))
                 .andExpect(jsonPath("$.id").value(55));
@@ -125,7 +138,8 @@ class ExpenseControllerTest {
 
         mockMvc.perform(post("/api/expenses/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(request))
+                .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isBadRequest());
 
         verify(expenseService).create(Mockito.any(ExpenseRequest.class));
@@ -135,7 +149,7 @@ class ExpenseControllerTest {
     @Test
     @DisplayName("DELETE /api/expenses/{id} should delegate to the service and return ok")
     void deleteShouldReturnOk() throws Exception {
-        mockMvc.perform(delete("/api/expenses/{id}", 77L))
+        mockMvc.perform(delete("/api/expenses/{id}", 77L).with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk());
 
         verify(expenseService).delete(77L);
