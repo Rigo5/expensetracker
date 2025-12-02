@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import expensetracker.exception.UserNotFoundException;
 import expensetracker.models.Expense;
 import expensetracker.models.ExpenseRequest;
+import expensetracker.models.ExpenseResponse;
 import expensetracker.models.User;
 import expensetracker.repository.ExpenseRepository;
 import expensetracker.repository.UserRepository;
+import expensetracker.utility.ExpenseMapper;
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService{
@@ -26,13 +28,18 @@ public class ExpenseServiceImpl implements ExpenseService{
 	}
 	
 	@Override
-	public List<Expense> findAll() {
-		return expenseRepository.findAll();
+	public List<ExpenseResponse> findAll() {
+		return expenseRepository.findAll()
+					.stream()
+					.map(ExpenseMapper::mapToResponse)
+					.toList();
 	}
 
 	@Override
-	public Optional<Expense> find(Long id) {
-		return expenseRepository.findById(id);
+	public Optional<ExpenseResponse> find(Long id) {
+		Optional<Expense> expense = expenseRepository.findById(id);
+		if(expense.isPresent()) return Optional.of(ExpenseMapper.mapToResponse(expense.get()));
+		return Optional.empty();
 	}
 
 	@Override

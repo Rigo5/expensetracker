@@ -2,6 +2,7 @@ package expensetracker.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -22,11 +23,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import expensetracker.exception.UserNotFoundException;
 import expensetracker.models.Expense;
 import expensetracker.models.ExpenseRequest;
+import expensetracker.models.ExpenseResponse;
 import expensetracker.models.TransactionCategory;
 import expensetracker.models.TransactionType;
 import expensetracker.models.User;
 import expensetracker.repository.ExpenseRepository;
 import expensetracker.repository.UserRepository;
+import expensetracker.utility.ExpenseMapper;
 
 @ExtendWith(MockitoExtension.class)
 class ExpenseServiceImplTest {
@@ -39,17 +42,20 @@ class ExpenseServiceImplTest {
 
     @InjectMocks
     private ExpenseServiceImpl expenseService;
+    
+    private User owner = new User(5L, "John", "Doe", "john.doe@example.com", null, null);
 
+    
     @Test
     @DisplayName("findAll should delegate to repository")
     void findAllShouldReturnRepositoryData() {
-        Expense expense = new Expense(1L, "Book", null, new BigDecimal("10.00"),
+        Expense expense = new Expense(1L, "Book", owner, new BigDecimal("10.00"),
                 TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
         when(expenseRepository.findAll()).thenReturn(List.of(expense));
 
-        List<Expense> result = expenseService.findAll();
+        List<ExpenseResponse> result = expenseService.findAll();
 
-        assertThat(result).containsExactly(expense);
+        assertEquals(expense.getId(), result.get(0).getId());
         verify(expenseRepository).findAll();
         verifyNoMoreInteractions(expenseRepository, userRepository);
     }
@@ -57,13 +63,13 @@ class ExpenseServiceImplTest {
     @Test
     @DisplayName("find should return the repository result")
     void findShouldReturnOptionalFromRepository() {
-        Expense expense = new Expense(2L, "Groceries", null, new BigDecimal("25.50"),
+        Expense expense = new Expense(2L, "Groceries", owner, new BigDecimal("25.50"),
                 TransactionCategory.FOOD, TransactionType.EXPENSE, null, null);
         when(expenseRepository.findById(2L)).thenReturn(Optional.of(expense));
 
-        Optional<Expense> result = expenseService.find(2L);
+        Optional<ExpenseResponse> result = expenseService.find(2L);
 
-        assertThat(result).containsSame(expense);
+        assertEquals(expense.getId(), result.get().getId());
         verify(expenseRepository).findById(2L);
         verifyNoMoreInteractions(expenseRepository, userRepository);
     }
