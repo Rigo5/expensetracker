@@ -35,10 +35,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import expensetracker.models.Expense;
 import expensetracker.models.ExpenseRequest;
+import expensetracker.models.ExpenseResponse;
 import expensetracker.models.TransactionCategory;
 import expensetracker.models.TransactionType;
 import expensetracker.models.User;
 import expensetracker.services.ExpenseService;
+import expensetracker.utility.ExpenseMapper;
 import expensetracker.config.SecurityConfig;
 
 @WebMvcTest(controllers = ExpenseController.class)
@@ -67,8 +69,9 @@ class ExpenseControllerTest {
         User owner = new User(1L, "John", "Doe", "john.doe@example.com", null, null);
         Expense expense = new Expense(10L, "Laptop", owner, new BigDecimal("1200.00"),
                 TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
-
-        when(expenseService.findAll()).thenReturn(List.of(expense));
+        ExpenseResponse responseExpense = ExpenseMapper.mapToResponse(expense);
+        
+        when(expenseService.findAll()).thenReturn(List.of(responseExpense));
 
         mockMvc.perform(get("/api/expenses/").with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())
@@ -99,7 +102,7 @@ class ExpenseControllerTest {
         Expense expense = new Expense(30L, "Groceries", owner, new BigDecimal("45.50"),
                 TransactionCategory.FOOD, TransactionType.EXPENSE, null, null);
 
-        when(expenseService.find(30L)).thenReturn(Optional.of(expense));
+        when(expenseService.find(30L)).thenReturn(Optional.of(ExpenseMapper.mapToResponse(expense)));
 
         mockMvc.perform(get("/api/expenses/{id}", 30L).with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())

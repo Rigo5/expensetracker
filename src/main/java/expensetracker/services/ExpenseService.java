@@ -5,10 +5,11 @@ import java.util.Optional;
 
 import expensetracker.models.Expense;
 import expensetracker.models.ExpenseRequest;
+import expensetracker.models.ExpenseResponse;
 
 public interface ExpenseService {
-	public List<Expense> findAll(); 
-	public Optional<Expense> find(Long id); 
+	public List<ExpenseResponse> findAll(); 
+	public Optional<ExpenseResponse> find(Long id); 
 	public Optional<Long> create(ExpenseRequest request);
 	public Optional<Expense> update(Long id, ExpenseRequest request);
 	public Optional<Void> delete(Long id);
