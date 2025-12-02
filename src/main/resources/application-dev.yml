@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=ExpenseTracker;encrypt=false;trustServerCertificate=true
+    url: jdbc:sqlserver://applicazioncine.database.windows.net:1433;databaseName=basedatiine;encrypt=false;trustServerCertificate=true
     username: sa-wrigo5sql
     password: 2xubOYKopjnC5XlCiRqJ
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -18,10 +18,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.SQLServerDialect
         format_sql: true
-        default_schema: dbo
+        default_schema: expense_test
 
 server:
-  port: 8081
+  port: 9093
 
 app:
   auth:

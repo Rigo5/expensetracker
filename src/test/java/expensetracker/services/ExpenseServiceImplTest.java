@@ -107,11 +107,73 @@ class ExpenseServiceImplTest {
     }
 
     @Test
-    @DisplayName("delete should delegate to repository")
-    void deleteShouldCallRepository() {
-        expenseService.delete(8L);
+	@DisplayName("delete should delegate to repository")
+	void deleteShouldCallRepository() {
+		expenseService.delete(8L);
 
-        verify(expenseRepository).deleteById(8L);
-        verifyNoMoreInteractions(expenseRepository, userRepository);
-    }
+		verify(expenseRepository).deleteById(8L);
+		verifyNoMoreInteractions(expenseRepository, userRepository);
+	}
+
+	@Test
+	@DisplayName("update should return empty when expense does not exist")
+	void updateShouldReturnEmptyWhenMissing() {
+		ExpenseRequest request = new ExpenseRequest("Monitor", new BigDecimal("200.00"),
+				TransactionCategory.HOBBY, TransactionType.EXPENSE, 3L);
+		when(expenseRepository.findById(10L)).thenReturn(Optional.empty());
+
+		Optional<Expense> result = expenseService.update(10L, request);
+
+		assertThat(result).isEmpty();
+		verify(expenseRepository).findById(10L);
+		verifyNoMoreInteractions(expenseRepository, userRepository);
+	}
+
+	@Test
+	@DisplayName("update should throw when new owner is missing")
+	void updateShouldThrowWhenOwnerMissing() {
+		ExpenseRequest request = new ExpenseRequest("Monitor", new BigDecimal("200.00"),
+				TransactionCategory.HOBBY, TransactionType.EXPENSE, 3L);
+		Expense existing = new Expense(10L, "Old monitor", null, new BigDecimal("150.00"),
+				TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
+		when(expenseRepository.findById(10L)).thenReturn(Optional.of(existing));
+		when(userRepository.existsById(3L)).thenReturn(false);
+
+		assertThatThrownBy(() -> expenseService.update(10L, request))
+				.isInstanceOf(UserNotFoundException.class)
+				.hasMessage("User id not found");
+
+		verify(expenseRepository).findById(10L);
+		verify(userRepository).existsById(3L);
+		verifyNoMoreInteractions(expenseRepository, userRepository);
+	}
+
+	@Test
+	@DisplayName("update should apply new values and persist when expense exists")
+	void updateShouldPersistChanges() {
+		User owner = new User(3L, "Alice", "Johnson", "alice@example.com", null, null);
+		Expense existing = new Expense(10L, "Old monitor", owner, new BigDecimal("150.00"),
+				TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
+		ExpenseRequest request = new ExpenseRequest("New monitor", new BigDecimal("220.00"),
+				TransactionCategory.HOME, TransactionType.EXPENSE, 3L);
+
+		when(expenseRepository.findById(10L)).thenReturn(Optional.of(existing));
+		when(userRepository.existsById(3L)).thenReturn(true);
+		when(userRepository.getReferenceById(3L)).thenReturn(owner);
+		when(expenseRepository.save(any(Expense.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		Optional<Expense> result = expenseService.update(10L, request);
+
+		assertThat(result).isPresent();
+		assertThat(result.get().getDescription()).isEqualTo("New monitor");
+		assertThat(result.get().getAmount()).isEqualByComparingTo("220.00");
+		assertThat(result.get().getCategory()).isEqualTo(TransactionCategory.HOME);
+		assertThat(result.get().getOwner()).isSameAs(owner);
+
+		verify(expenseRepository).findById(10L);
+		verify(userRepository).existsById(3L);
+		verify(userRepository).getReferenceById(3L);
+		verify(expenseRepository).save(any(Expense.class));
+		verifyNoMoreInteractions(expenseRepository, userRepository);
+	}
 }

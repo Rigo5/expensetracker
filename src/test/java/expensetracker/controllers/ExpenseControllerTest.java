@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -143,6 +144,47 @@ class ExpenseControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(expenseService).create(Mockito.any(ExpenseRequest.class));
+        verifyNoMoreInteractions(expenseService);
+    }
+
+    @Test
+    @DisplayName("PUT /api/expenses/{id} should return not found when expense is missing")
+    void updateShouldReturnNotFoundWhenMissing() throws Exception {
+        ExpenseRequest request = new ExpenseRequest("Gym", new BigDecimal("70.00"),
+                TransactionCategory.SPORT, TransactionType.EXPENSE, 2L);
+
+        when(expenseService.update(Mockito.eq(88L), any(ExpenseRequest.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/expenses/{id}", 88L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .with(httpBasic(USERNAME, PASSWORD)))
+                .andExpect(status().isNotFound());
+
+        verify(expenseService).update(Mockito.eq(88L), any(ExpenseRequest.class));
+        verifyNoMoreInteractions(expenseService);
+    }
+
+    @Test
+    @DisplayName("PUT /api/expenses/{id} should return the updated expense")
+    void updateShouldReturnUpdatedExpense() throws Exception {
+        User owner = new User(2L, "Jane", "Smith", "jane.smith@example.com", null, null);
+        Expense updated = new Expense(30L, "Updated Groceries", owner, new BigDecimal("55.50"),
+                TransactionCategory.FOOD, TransactionType.EXPENSE, null, null);
+        ExpenseRequest request = new ExpenseRequest("Updated Groceries", new BigDecimal("55.50"),
+                TransactionCategory.FOOD, TransactionType.EXPENSE, 2L);
+
+        when(expenseService.update(Mockito.eq(30L), any(ExpenseRequest.class))).thenReturn(Optional.of(updated));
+
+        mockMvc.perform(put("/api/expenses/{id}", 30L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .with(httpBasic(USERNAME, PASSWORD)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value("Updated Groceries"))
+                .andExpect(jsonPath("$.amount").value(55.50));
+
+        verify(expenseService).update(Mockito.eq(30L), any(ExpenseRequest.class));
         verifyNoMoreInteractions(expenseService);
     }
 
