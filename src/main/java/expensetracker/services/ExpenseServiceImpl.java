@@ -51,6 +51,29 @@ public class ExpenseServiceImpl implements ExpenseService{
 	}
 
 	@Override
+	public Optional<Expense> update(Long id, ExpenseRequest request) {
+		Optional<Expense> maybeExpense = expenseRepository.findById(id);
+		if (maybeExpense.isEmpty()) {
+			return Optional.empty();
+		}
+
+		if (!userRepository.existsById(request.getOwnerId())) {
+			throw new UserNotFoundException("User id not found");
+		}
+
+		User owner = userRepository.getReferenceById(request.getOwnerId());
+		Expense expense = maybeExpense.get();
+		expense.setDescription(request.getDescription());
+		expense.setOwner(owner);
+		expense.setAmount(request.getAmount());
+		expense.setCategory(request.getCategory());
+		expense.setType(request.getType());
+
+		Expense saved = expenseRepository.save(expense);
+		return Optional.of(saved);
+	}
+
+	@Override
 	public Optional<Void> delete(Long id) {
 		expenseRepository.deleteById(id);
 		return Optional.empty();
