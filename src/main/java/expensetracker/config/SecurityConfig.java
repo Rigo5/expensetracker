@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults());
         return http.build();
     }
-
+    /*
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         //UserDetails
@@ -52,8 +52,8 @@ public class SecurityConfig {
                         .build()
         );
     }
-
-    
+	*/
+    	
     @Bean
     public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
     	DaoAuthenticationProvider daoAuth = new DaoAuthenticationProvider();
