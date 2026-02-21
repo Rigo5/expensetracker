@@ -26,8 +26,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
@@ -64,44 +62,24 @@ class ExpenseControllerTest {
 
     private static final String USERNAME = "testuser";
     private static final String PASSWORD = "testpass";
-    private static final PageRequest DEFAULT_PAGE = PageRequest.of(0, 10);
 
     @Test
     @DisplayName("GET /api/expenses/ should return all expenses")
     void allShouldReturnExpenses() throws Exception {
-        User owner = new User(1L, "John", "Doe", "john.doe@example.com", null, null, "test");
+        User owner = new User(1L, "John", "Doe", "john.doe@example.com", null, null);
         Expense expense = new Expense(10L, "Laptop", owner, new BigDecimal("1200.00"),
                 TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
         ExpenseResponse responseExpense = ExpenseMapper.mapToResponse(expense);
         
-        when(expenseService.findAll(DEFAULT_PAGE)).thenReturn(new PageImpl<>(List.of(responseExpense)));
+        when(expenseService.findAll()).thenReturn(List.of(responseExpense));
 
         mockMvc.perform(get("/api/expenses/").with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].description").value("Laptop"))
-                .andExpect(jsonPath("$.content[0].amount").value(1200.00));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].description").value("Laptop"))
+                .andExpect(jsonPath("$[0].amount").value(1200.00));
 
-        verify(expenseService).findAll(DEFAULT_PAGE);
-        verifyNoMoreInteractions(expenseService);
-    }
-
-    @Test
-    @DisplayName("GET /api/expenses/user/{userId} should return paginated expenses for user")
-    void byUserShouldReturnPagedExpenses() throws Exception {
-        User owner = new User(2L, "Jane", "Smith", "jane.smith@example.com", null, null, "test");
-        Expense expense = new Expense(30L, "Groceries", owner, new BigDecimal("45.50"),
-                TransactionCategory.FOOD, TransactionType.EXPENSE, null, null);
-        ExpenseResponse responseExpense = ExpenseMapper.mapToResponse(expense);
-
-        when(expenseService.findByUser(2L, DEFAULT_PAGE)).thenReturn(new PageImpl<>(List.of(responseExpense)));
-
-        mockMvc.perform(get("/api/expenses/user/{userId}", 2L).with(httpBasic(USERNAME, PASSWORD)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].description").value("Groceries"));
-
-        verify(expenseService).findByUser(2L, DEFAULT_PAGE);
+        verify(expenseService).findAll();
         verifyNoMoreInteractions(expenseService);
     }
 
@@ -120,7 +98,7 @@ class ExpenseControllerTest {
     @Test
     @DisplayName("GET /api/expenses/{id} should return the expense when present")
     void getShouldReturnExpense() throws Exception {
-        User owner = new User(2L, "Jane", "Smith", "jane.smith@example.com", null, null, "test");
+        User owner = new User(2L, "Jane", "Smith", "jane.smith@example.com", null, null);
         Expense expense = new Expense(30L, "Groceries", owner, new BigDecimal("45.50"),
                 TransactionCategory.FOOD, TransactionType.EXPENSE, null, null);
 
@@ -193,7 +171,7 @@ class ExpenseControllerTest {
     @Test
     @DisplayName("PUT /api/expenses/{id} should return the updated expense")
     void updateShouldReturnUpdatedExpense() throws Exception {
-        User owner = new User(2L, "Jane", "Smith", "jane.smith@example.com", null, null, "test");
+        User owner = new User(2L, "Jane", "Smith", "jane.smith@example.com", null, null);
         Expense updated = new Expense(30L, "Updated Groceries", owner, new BigDecimal("55.50"),
                 TransactionCategory.FOOD, TransactionType.EXPENSE, null, null);
         ExpenseRequest request = new ExpenseRequest("Updated Groceries", new BigDecimal("55.50"),

@@ -1,10 +1,9 @@
 package expensetracker.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import expensetracker.exception.UserNotFoundException;
@@ -29,9 +28,11 @@ public class ExpenseServiceImpl implements ExpenseService{
 	}
 	
 	@Override
-	public Page<ExpenseResponse> findAll(Pageable pageable) {
-		return expenseRepository.findAll(pageable)
-				.map(ExpenseMapper::mapToResponse);
+	public List<ExpenseResponse> findAll() {
+		return expenseRepository.findAll()
+					.stream()
+					.map(ExpenseMapper::mapToResponse)
+					.toList();
 	}
 
 	@Override
@@ -77,16 +78,6 @@ public class ExpenseServiceImpl implements ExpenseService{
 
 		Expense saved = expenseRepository.save(expense);
 		return Optional.of(saved);
-	}
-
-	@Override
-	public Page<ExpenseResponse> findByUser(Long userId, Pageable pageable) {
-		if (!userRepository.existsById(userId)) {
-			throw new UserNotFoundException("User id not found");
-		}
-
-		return expenseRepository.findByOwnerId(userId, pageable)
-				.map(ExpenseMapper::mapToResponse);
 	}
 
 	@Override
