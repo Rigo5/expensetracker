@@ -60,4 +60,6 @@ public class Expense {
 		
 		this(null, description, owner, amount, category, type, null, null);
 	}
+	
+	
 }
