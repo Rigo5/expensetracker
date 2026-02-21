@@ -2,6 +2,7 @@ package expensetracker.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -18,9 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import expensetracker.exception.UserNotFoundException;
 import expensetracker.models.Expense;
@@ -31,6 +29,7 @@ import expensetracker.models.TransactionType;
 import expensetracker.models.User;
 import expensetracker.repository.ExpenseRepository;
 import expensetracker.repository.UserRepository;
+import expensetracker.utility.ExpenseMapper;
 
 @ExtendWith(MockitoExtension.class)
 class ExpenseServiceImplTest {
@@ -44,68 +43,35 @@ class ExpenseServiceImplTest {
     @InjectMocks
     private ExpenseServiceImpl expenseService;
     
-    private User owner = new User(5L, "John", "Doe", "john.doe@example.com", null, null, "test");
+    private User owner = new User(5L, "John", "Doe", "john.doe@example.com", null, null);
 
     
     @Test
-	@DisplayName("findAll should delegate to repository")
-	void findAllShouldReturnRepositoryData() {
-		Expense expense = new Expense(1L, "Book", owner, new BigDecimal("10.00"),
+    @DisplayName("findAll should delegate to repository")
+    void findAllShouldReturnRepositoryData() {
+        Expense expense = new Expense(1L, "Book", owner, new BigDecimal("10.00"),
                 TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
-        when(expenseRepository.findAll(PageRequest.of(0, 10))).thenReturn(new PageImpl<>(List.of(expense)));
+        when(expenseRepository.findAll()).thenReturn(List.of(expense));
 
-        Page<ExpenseResponse> result = expenseService.findAll(PageRequest.of(0, 10));
+        List<ExpenseResponse> result = expenseService.findAll();
 
-        assertThat(result.getContent()).hasSize(1);
-        verify(expenseRepository).findAll(PageRequest.of(0, 10));
+        assertEquals(expense.getId(), result.get(0).getId());
+        verify(expenseRepository).findAll();
         verifyNoMoreInteractions(expenseRepository, userRepository);
-	}
+    }
 
-	@Test
-	@DisplayName("find should return the repository result")
-	void findShouldReturnOptionalFromRepository() {
-		Expense expense = new Expense(2L, "Groceries", owner, new BigDecimal("25.50"),
+    @Test
+    @DisplayName("find should return the repository result")
+    void findShouldReturnOptionalFromRepository() {
+        Expense expense = new Expense(2L, "Groceries", owner, new BigDecimal("25.50"),
                 TransactionCategory.FOOD, TransactionType.EXPENSE, null, null);
         when(expenseRepository.findById(2L)).thenReturn(Optional.of(expense));
 
         Optional<ExpenseResponse> result = expenseService.find(2L);
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(expense.getId());
-		verify(expenseRepository).findById(2L);
-		verifyNoMoreInteractions(expenseRepository, userRepository);
-	}
-
-    @Test
-    @DisplayName("findByUser should return paged expenses for existing user")
-    void findByUserShouldReturnPage() {
-        Expense expense = new Expense(1L, "Book", owner, new BigDecimal("10.00"),
-                TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
-        PageRequest pageRequest = PageRequest.of(0, 5);
-        when(userRepository.existsById(5L)).thenReturn(true);
-        when(expenseRepository.findByOwnerId(5L, pageRequest)).thenReturn(new PageImpl<>(List.of(expense)));
-
-        Page<ExpenseResponse> result = expenseService.findByUser(5L, pageRequest);
-
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getId()).isEqualTo(1L);
-        verify(userRepository).existsById(5L);
-        verify(expenseRepository).findByOwnerId(5L, pageRequest);
+        assertEquals(expense.getId(), result.get().getId());
+        verify(expenseRepository).findById(2L);
         verifyNoMoreInteractions(expenseRepository, userRepository);
-    }
-
-    @Test
-    @DisplayName("findByUser should throw when user does not exist")
-    void findByUserShouldThrowWhenUserMissing() {
-        PageRequest pageRequest = PageRequest.of(0, 5);
-        when(userRepository.existsById(42L)).thenReturn(false);
-
-        assertThatThrownBy(() -> expenseService.findByUser(42L, pageRequest))
-                .isInstanceOf(UserNotFoundException.class)
-                .hasMessage("User id not found");
-
-        verify(userRepository).existsById(42L);
-        verifyNoInteractions(expenseRepository);
     }
 
     @Test
@@ -113,7 +79,7 @@ class ExpenseServiceImplTest {
     void createShouldPersistExpenseWhenOwnerExists() {
         ExpenseRequest request = new ExpenseRequest("Laptop", new BigDecimal("1200.00"),
                 TransactionCategory.HOBBY, TransactionType.EXPENSE, 5L);
-        User owner = new User(5L, "John", "Doe", "john.doe@example.com", null, null, "test");
+        User owner = new User(5L, "John", "Doe", "john.doe@example.com", null, null);
         when(userRepository.existsById(5L)).thenReturn(true);
         when(userRepository.getReferenceById(5L)).thenReturn(owner);
         when(expenseRepository.save(any(Expense.class))).thenAnswer(invocation -> {
@@ -191,7 +157,7 @@ class ExpenseServiceImplTest {
 	@Test
 	@DisplayName("update should apply new values and persist when expense exists")
 	void updateShouldPersistChanges() {
-		User owner = new User(3L, "Alice", "Johnson", "alice@example.com", null, null, "true");
+		User owner = new User(3L, "Alice", "Johnson", "alice@example.com", null, null);
 		Expense existing = new Expense(10L, "Old monitor", owner, new BigDecimal("150.00"),
 				TransactionCategory.HOBBY, TransactionType.EXPENSE, null, null);
 		ExpenseRequest request = new ExpenseRequest("New monitor", new BigDecimal("220.00"),

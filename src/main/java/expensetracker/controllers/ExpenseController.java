@@ -36,9 +36,8 @@ public class ExpenseController {
 	}
 	
 	@GetMapping("/")
-	public ResponseEntity<?> all(@RequestParam(defaultValue = "0") int page,
-								 @RequestParam(defaultValue = "10") int size){
-		Page<ExpenseResponse> expenses = expenseService.findAll(PageRequest.of(page, size));
+	public ResponseEntity<?> all(){
+		List<ExpenseResponse> expenses = expenseService.findAll();
 		return ResponseEntity.ok(expenses);
 	}
 	

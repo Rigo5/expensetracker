@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(nullable = false)
     private String name;
@@ -57,5 +57,4 @@ public class User{
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Expense> transactions;
 	*/
-
 }

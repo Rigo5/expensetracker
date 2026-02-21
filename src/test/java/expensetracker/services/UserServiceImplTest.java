@@ -14,9 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import expensetracker.models.User;
 import expensetracker.repository.UserRepository;
@@ -30,23 +27,23 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-	@Test
-	@DisplayName("findAll should return all users from repository")
-	void findAllShouldReturnRepositoryUsers() {
-		User user = new User(1L, "Alice", "Smith", "alice@example.com", null, null, "true");
-        when(userRepository.findAll(PageRequest.of(0, 10))).thenReturn(new PageImpl<>(List.of(user)));
+    @Test
+    @DisplayName("findAll should return all users from repository")
+    void findAllShouldReturnRepositoryUsers() {
+        User user = new User(1L, "Alice", "Smith", "alice@example.com", null, null);
+        when(userRepository.findAll()).thenReturn(List.of(user));
 
-        Page<User> result = userService.findAll(PageRequest.of(0, 10));
+        List<User> result = userService.findAll();
 
-        assertThat(result.getContent()).containsExactly(user);
-        verify(userRepository).findAll(PageRequest.of(0, 10));
+        assertThat(result).containsExactly(user);
+        verify(userRepository).findAll();
         verifyNoMoreInteractions(userRepository);
-	}
+    }
 
     @Test
     @DisplayName("find should return result from repository")
     void findShouldReturnOptionalFromRepository() {
-        User user = new User(2L, "Bob", "Jones", "bob@example.com", null, null, "yoooo");
+        User user = new User(2L, "Bob", "Jones", "bob@example.com", null, null);
         when(userRepository.findById(2L)).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.find(2L);
@@ -59,7 +56,7 @@ class UserServiceImplTest {
     @Test
     @DisplayName("create should save the user and return its id")
     void createShouldPersistUser() {
-        User request = new User(null, "Carol", "Williams", "carol@example.com", null, null, "test");
+        User request = new User(null, "Carol", "Williams", "carol@example.com", null, null);
         when(userRepository.save(request)).thenAnswer(invocation -> {
             User saved = invocation.getArgument(0);
             saved.setId(10L);

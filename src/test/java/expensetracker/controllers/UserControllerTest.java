@@ -21,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
@@ -57,23 +55,23 @@ class UserControllerTest {
     @Test
     @DisplayName("GET /api/users/ should return all users")
     void allShouldReturnUsers() throws Exception {
-        User user = new User(1L, "Alice", "Johnson", "alice@example.com", null, null, "test");
+        User user = new User(1L, "Alice", "Johnson", "alice@example.com", null, null);
 
-        when(userService.findAll(PageRequest.of(0, 10))).thenReturn(new PageImpl<>(List.of(user)));
+        when(userService.findAll()).thenReturn(List.of(user));
 
         mockMvc.perform(get("/api/users/").with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].email").value("alice@example.com"));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].email").value("alice@example.com"));
 
-        verify(userService).findAll(PageRequest.of(0, 10));
+        verify(userService).findAll();
         verifyNoMoreInteractions(userService);
     }
 
     @Test
     @DisplayName("GET /api/users/{id} should return the user when present")
     void getShouldReturnUser() throws Exception {
-        User user = new User(2L, "Bob", "Williams", "bob@example.com", null, null, "test");
+        User user = new User(2L, "Bob", "Williams", "bob@example.com", null, null);
 
         when(userService.find(2L)).thenReturn(Optional.of(user));
 
@@ -100,7 +98,7 @@ class UserControllerTest {
     @Test
     @DisplayName("POST /api/users/ should return created when service provides an id")
     void postShouldReturnCreated() throws Exception {
-        User request = new User(null, "Carol", "Smith", "carol@example.com", null, null, "test");
+        User request = new User(null, "Carol", "Smith", "carol@example.com", null, null);
 
         when(userService.create(any(User.class))).thenReturn(Optional.of(12L));
 
