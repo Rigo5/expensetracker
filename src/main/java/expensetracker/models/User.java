@@ -2,8 +2,15 @@ package expensetracker.models;
 
 import java.time.LocalDate;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,27 +34,33 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(nullable = false)
-    String name;
+    private String name;
 
     @Column(nullable = false)
-    String surname;
+    private String surname;
 
     @Column(nullable = false)
-    String email;
+    private String email;
 
     @CreationTimestamp
-    LocalDate createDate;
+    private LocalDate createDate;
     
     @UpdateTimestamp
-    LocalDate updateDate;
+    private LocalDate updateDate;
+    
+    @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password; 
+        
     /*
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Expense> transactions;
 	*/
+
 }

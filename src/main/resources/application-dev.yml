@@ -9,7 +9,6 @@ spring:
       minimum-idle: 2
       idle-timeout: 60000
       connection-timeout: 30000
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,7 +20,7 @@ spring:
         default_schema: expense_test
 
 server:
-  port: 9093
+  port: 8081
 
 app:
   auth:
