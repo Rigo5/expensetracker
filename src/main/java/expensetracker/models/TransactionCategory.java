@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TransactionCategory {
 	
-	INCOME, FOOD, PARTY, HOBBY, SPORT, STUDY, HOME, GIFTS;
+	INCOME, FOOD, PARTY, HOBBY, SPORT, STUDY, HOME, GIFTS, HEALTH, APPS, CAR;
 	
 	@JsonCreator
 	public static TransactionCategory from(String value) {

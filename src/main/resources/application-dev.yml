@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://applicazioncine.database.windows.net:1433;databaseName=basedatiine;encrypt=false;trustServerCertificate=true
+    username: sa-wrigo5sql
+    password: 2xubOYKopjnC5XlCiRqJ
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 60000
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: true
+        default_schema: expense_test
+
+server:
+  port: 9093
+
+app:
+  auth:
+    username: ${BASIC_AUTH_USERNAME:admin}
+    password: ${BASIC_AUTH_PASSWORD:changeme}
