@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults());
         return http.build();
     }
-
+    /*
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         return new InMemoryUserDetailsManager(
@@ -43,7 +43,8 @@ public class SecurityConfig {
                         .build()
         );
     }
-
+	*/
+    	
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
